@@ -171,8 +171,12 @@ class commandClass {
             console.log(`pure-publish: would publish '${path.relative('.',this.config.tarball)}'`);
             return; }
 
+        let cmd: string[] = this.program.args;
+        if (cmd[0]==='publish') cmd=cmd.slice(1);
+        cmd=['npm','publish',this.tarball].concat(cmd);
+
         await this.makeTarball();
-        err=await this.exec(['npm','publish',this.tarball].concat(this.program.args));
+        err=await this.exec(cmd);
         fs.rmSync(this.tarball,{ force: true });
     
         if (err) throw err;
