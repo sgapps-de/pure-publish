@@ -7,7 +7,6 @@
     "bin": "./bin/cli.js",
     "scripts": {
         "build": "tsc",
-        "prepack": "echo \"Use 'npm run pck' to pack!\" && exit 1",
         "prepublish": "echo \"Use 'npm run pub' to publish!\" && exit 1",
         "pck": "npm run build && node lib/cli.js pack",
         "pub": "npm run build && node lib/cli.js publish",
