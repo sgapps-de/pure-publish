@@ -1,6 +1,6 @@
 {
     "name": "pure-publish",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "Publish with a pure package.json",
     "author": "sgapps.de <webmaster@sgapps.de>",
     "repository": {
@@ -44,6 +44,7 @@
         "lib/*.d.ts"
     ],
     "pure-publish": {
+        "tarball": "./.pack/*",
         "remove": [
             "files",
             "pure-publish",
