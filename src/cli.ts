@@ -275,14 +275,17 @@ class commandClass {
 
     {   this.tarball = this.config.tarball;
         
-        const fnt = path.join(path.dirname(this.tarball),this.package.name+'-'+this.package.version+'.tgz');
+        const dn = path.dirname(this.tarball);
+        const fnt = path.join(dn,this.package.name+'-'+this.package.version+'.tgz');
 
         if (this.dryRun) {
             await this.cmdPure();
             console.log(`pure-publish: would create '${path.relative('.',this.tarball)}'`);
             return; }
 
-        const err = await this.exec(['npm','pack','--pack-destination',path.dirname(fnt)]);
+        await fsp.mkdir(dn,{ recursive: true });
+
+        const err = await this.exec(['npm','pack','--pack-destination',dn]);
         if (err) throw err;
 
         const proc = {
