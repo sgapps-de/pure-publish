@@ -1,5 +1,5 @@
-node_modules
-*.log
-.pack
 .vscode
+node_modules
+pack
 lib
+*.log

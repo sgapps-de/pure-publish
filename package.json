@@ -44,7 +44,7 @@
         "lib/*.d.ts"
     ],
     "pure-publish": {
-        "tarball": "./.pack/*",
+        "tarball": "./pack/*",
         "remove": [
             "files",
             "pure-publish",
