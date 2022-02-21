@@ -4,6 +4,7 @@ import { execSync } from 'child_process';
 import fsp from 'fs/promises';
 import fs  from 'fs';
 import dot from 'dot-object';
+import { processTar } from './process';
 
 interface ConfigObject {
 
@@ -15,6 +16,8 @@ interface PurePublishConfig {
     suffix:  string;
 
     indent:  string | number;
+
+    tarball: string;
 
     remove?: string[];
     replace?: ConfigObject[];
@@ -34,6 +37,8 @@ class commandClass {
     package!:       ConfigObject;
 
     purePackage?:   ConfigObject;
+
+    tarball!:       string;
 
     opts!:          ConfigObject;
     dryRun!:        boolean;
@@ -58,6 +63,7 @@ class commandClass {
     {   this.program
             .version(this.version)
             .option('-s, --suffix <suffix>','specify suffix for backup file - default \'.backup\'')
+            .option('-t, --tarball <tarball>','specify tarball file')
             .option('--dry-run','dry run - no real changes')
             .hook('preAction',this.preAction.bind(this));
 
@@ -109,7 +115,6 @@ class commandClass {
         const pps = JSON.stringify(this.purePackage,undefined,this.config.indent);
 
         if (this.dryRun) {
-            console.log(`pure-publish: would copy 'package.json' to '${path.basename(fnb)}'`);
             console.log(`pure-publish: pure version of 'package.json':`);
             for (const ln of pps.split(/\r?\n/g)) {
                 console.log('>  '+ln);
@@ -145,27 +150,27 @@ class commandClass {
 
     async cmdPack() {
 
-        let err: any;
+        if (this.dryRun) {
+            await this.cmdPure();
+            console.log(`pure-publish: would create '${path.relative('.',this.config.tarball)}'`);
+            return; }
 
-        await this.cmdPure();
-
-        err=await this.exec(['npm','pack'].concat(this.program.args));
-    
-        this.cmdRestore();
-
-        if (err) throw err;
+        await this.makeTarball();
     }
 
     async cmdPublish() {
 
         let err: any;
 
-        await this.cmdPure();
+        if (this.dryRun) {
+            await this.cmdPure();
+            console.log(`pure-publish: would publish '${path.relative('.',this.config.tarball)}'`);
+            return; }
 
-        err=await this.exec(['npm','publish'].concat(this.program.args));
+        await this.makeTarball();
+        err=await this.exec(['npm','publish',this.tarball].concat(this.program.args));
+        fs.rmSync(this.tarball,{ force: true });
     
-        this.cmdRestore();
-
         if (err) throw err;
     }
 
@@ -228,6 +233,7 @@ class commandClass {
 
         let fnc: string;
         let c: ConfigObject = { };
+        let tb: string;
 
         const pcx = this.package['pure-publish'];
         if (pcx instanceof Object) Object.assign(c,pcx);
@@ -247,7 +253,42 @@ class commandClass {
         else if (!c.suffix)
             c.suffix = '.backup';
 
+        tb=path.resolve(this.root,opts.tarball ?? c.tarball ?? '*');
+        if (path.basename(tb)==='*') 
+            tb=path.join(path.dirname(tb),this.package.name+'-'+this.package.version+'.tgz');
+        c.tarball=tb;
+
         if (!c.indent) c.indent=2;
+    }
+
+    async makeTarball()
+
+    {   this.tarball = this.config.tarball;
+        
+        const fnt = path.join(path.dirname(this.tarball),this.package.name+'-'+this.package.version+'.tgz');
+
+        if (this.dryRun) {
+            await this.cmdPure();
+            console.log(`pure-publish: would create '${path.relative('.',this.tarball)}'`);
+            return; }
+
+        const err = await this.exec(['npm','pack','--pack-destination',path.dirname(fnt)]);
+        if (err) throw err;
+
+        const proc = {
+            input: fnt,
+            removeInput: true,
+            output: this.tarball,
+            proc: [
+                {   match:   'package/package.json',
+                    proc:    'json',
+                    remove:  this.config.remove,
+                    replace: this.config.replace
+                }
+            ]
+        }
+
+        await processTar(proc);
     }
 
     makePurePackage() {
@@ -275,6 +316,9 @@ class commandClass {
     }
 
     async exec(cmd: string[]): Promise<any> {
+
+        if (cmd[0]==='npm' && process.stdout.isTTY)
+            cmd=['npm','--color'].concat(cmd.slice(1));
 
         const cs = cmd.map(this.cmdPar).join(' ');
 

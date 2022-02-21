@@ -1,32 +1,55 @@
 {
-  "name": "pure-publish",
-  "version": "1.0.0",
-  "description": "Publish with a pure package.json",
-  "main": "./lib/cli.js",
-  "bin": "./lib/cli.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [
-    "clean",
-    "publish",
-    "pure"
-  ],
-  "author": "sgapps.de <webmaster@sgapps.de>",
-  "license": "MIT",
-  "dependencies": {
-    "commander": "^9.0.0",
-    "dot-object": "^2.1.4"
-  },
-  "devDependencies": {
-    "@types/dot-object": "^2.1.2",
-    "@types/node": "^17.0.18"
-  },
-  "pure-publish": {
-    "remove": [
-      "pure-publish",
-      "devDependencies",
-      "scripts"
-    ]
-  }
+    "name": "pure-publish",
+    "version": "1.0.1",
+    "description": "Publish with a pure package.json",
+    "main": "./lib/cli.js",
+    "types": "./lib/cli.d.ts",
+    "bin": "./bin/cli.js",
+    "scripts": {
+        "build": "tsc",
+        "prepack": "echo \"Use 'npm run pck' to pack!\" && exit 1",
+        "prepublish": "echo \"Use 'npm run pub' to publish!\" && exit 1",
+        "pck": "npm run build && node lib/cli.js pack",
+        "pub": "npm run build && node lib/cli.js publish",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [
+        "clean",
+        "publish",
+        "pure",
+        "purify"
+    ],
+    "author": "sgapps.de <webmaster@sgapps.de>",
+    "license": "MIT",
+    "dependencies": {
+        "commander": "^9.0.0",
+        "dot-object": "^2.1.4",
+        "gunzip-maybe": "^1.4.2",
+        "multimatch": "^5.0.0",
+        "tar-stream": "^2.2.0"
+    },
+    "devDependencies": {
+        "@types/dot-object": "^2.1.2",
+        "@types/gunzip-maybe": "^1.4.0",
+        "@types/node": "^17.0.18",
+        "@types/tar-stream": "^2.2.2",
+        "typescript": "^4.4.4"
+    },
+    "files": [
+        "bin/cli.js",
+        "lib/*.js",
+        "lib/*.d.ts"
+    ],
+    "pure-publish": {
+        "remove": [
+            "files",
+            "pure-publish",
+            "devDependencies"
+        ],
+        "replace": {
+            "scripts": {
+                "test": "echo \"No tests defined\" && exit 1"
+            }
+        }
+    }
 }
