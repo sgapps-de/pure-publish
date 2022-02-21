@@ -42,6 +42,8 @@ class commandClass {
 
     opts!:          ConfigObject;
     dryRun!:        boolean;
+    forceColor!:    boolean;
+
     config!:        PurePublishConfig;
 
     constructor()
@@ -64,6 +66,7 @@ class commandClass {
             .version(this.version)
             .option('-s, --suffix <suffix>','specify suffix for backup file - default \'.backup\'')
             .option('-t, --tarball <tarball>','specify tarball file')
+            .option('--color','force colorized output')
             .option('--dry-run','dry run - no real changes')
             .hook('preAction',this.preAction.bind(this));
 
@@ -98,7 +101,8 @@ class commandClass {
 
         this.opts = Object.assign({},c.opts(),ac.opts());
 
-        this.dryRun = this.opts.dryRun ?? false;;
+        this.dryRun = this.opts.dryRun ?? false;
+        this.forceColor = this.opts.color ?? false;
         
         await this.getConfig(this.program.opts());
     }
@@ -211,6 +215,8 @@ class commandClass {
         this.root=path.dirname(pfn);
         this.packageFile = pfn;
         this.package=JSON.parse(ps);
+
+        fs.rmSync(path.join(this.root,'pure-publish.log'),{ force: true});
     }
 
     findPackageJson(dir: string) {
@@ -317,7 +323,7 @@ class commandClass {
 
     async exec(cmd: string[]): Promise<any> {
 
-        if (cmd[0]==='npm' && process.stdout.isTTY)
+        if (cmd[0]==='npm' && (this.forceColor || process.stdout.isTTY))
             cmd=['npm','--color'].concat(cmd.slice(1));
 
         const cs = cmd.map(this.cmdPar).join(' ');
@@ -328,7 +334,7 @@ class commandClass {
         }
 
         try {
-            execSync(cs,{ cwd: this.root });
+            execSync(cs+' >>"'+path.join(this.root,'pure-publish.log')+'" 2>&1',{ cwd: this.root });
             return null;
         }
         catch(err: any) {
