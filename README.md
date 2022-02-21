@@ -46,7 +46,7 @@ After 'package.json' is purified the specifed `<cmd>` is executed. Afterwards th
 
 #### `--suffix <sfx>`
 
-Instead of 'package.json.backup' the backup file will be name 'package.json`<sfx>`'
+Instead of 'package.json.backup' the backup file will be named 'package.json`<sfx>`'
 
 #### `--tarball <path>`
 
@@ -57,7 +57,7 @@ pure-publish pack --tarball "./.pack/*"
 
 ### `--dry-run`
 
-Do not change any file or do the real publishing. Show only what would be done. Also dump the purified version of 'package.json'.
+Do nothing - show only what would be done. Also dump the purified version of 'package.json'.
 
 ## Configuration
 
