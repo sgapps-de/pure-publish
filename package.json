@@ -2,6 +2,17 @@
     "name": "pure-publish",
     "version": "1.0.1",
     "description": "Publish with a pure package.json",
+    "author": "sgapps.de <webmaster@sgapps.de>",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/sgapps-de/pure-publish.git"
+    },
+    "keywords": [
+        "clean",
+        "publish",
+        "pure",
+        "purify"
+    ],
     "main": "./lib/cli.js",
     "types": "./lib/cli.d.ts",
     "bin": "./bin/cli.js",
@@ -12,13 +23,6 @@
         "pub": "npm run build && node lib/cli.js publish",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
-    "keywords": [
-        "clean",
-        "publish",
-        "pure",
-        "purify"
-    ],
-    "author": "sgapps.de <webmaster@sgapps.de>",
     "license": "MIT",
     "dependencies": {
         "commander": "^9.0.0",
